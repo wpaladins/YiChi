@@ -104,7 +104,67 @@ bool ReadBinary(const char* cfilename)
         }
         facet _facet(p1->GetID(), p2->GetID(), p3->GetID(), _normal);
         mesh.facets.push_back(_facet);
-        
+
+        // 边操作
+        eBSTree ePos; // BSTree---
+        bool eTaller; // BSTree---
+        edge* e1;
+        if (*p1 < *p2) {
+            e1 = new edge(p2, p1);
+        }
+        else {
+            e1 = new edge(p1, p2);
+        }
+        if(!eFindNode(eRoot, *e1, &ePos)) { // BSTree---
+            // 没有找到
+            e1->putNearTri(_facet);
+            eInsertAVL(&eRoot, *e1, &eTaller);
+            mesh.edges.push_back(*e1);
+        }
+        else {
+            // 找到了
+            edge* temp = e1;
+            e1 = &ePos->data;
+            delete temp;
+            e1->putNearTri(_facet);
+        }
+        edge* e2;
+        if (*p3 < *p2) {
+            e2 = new edge(p2, p3);
+        }
+        else {
+            e2 = new edge(p3, p2);
+        }
+        if (!eFindNode(eRoot, *e2, &ePos)) {
+            e2->putNearTri(_facet);
+            eInsertAVL(&eRoot, *e2, &eTaller);
+            mesh.edges.push_back(*e2);
+        }
+        else {
+            edge* temp = e2;
+            e2 = &ePos->data;
+            delete temp;
+            e2->putNearTri(_facet);
+        }
+        edge* e3;
+        if (*p1 < *p3) {
+            e3 = new edge(p3, p1);
+        }
+        else {
+            e3 = new edge(p1, p3);
+        }
+        //AVLTree--- if (edgeAVLTree.Insert(*e3, *e3)) {
+        if (!eFindNode(eRoot, *e3, &ePos)) { // BSTree---
+            e3->putNearTri(_facet);
+            eInsertAVL(&eRoot, *e3, &eTaller);
+            mesh.edges.push_back(*e3);
+        }
+        else {
+            edge* temp = e3;
+            e3 = &ePos->data;
+            delete temp;
+            e3->putNearTri(_facet);
+        }
         in.read((char*)coorXYZ, 2);
     }
 

@@ -173,13 +173,52 @@ void EdgeEliminate() {
 				double E = calc_det();
 				
 				// 计算e的中点Pm和Pm处的法向量
+				std::vector<edge*> adjTriOpEdge1 = e->GetP1()->GetAdjTriOpEdge(),
+					adjTriOpEdge2 = e->GetP2()->GetAdjTriOpEdge();
+				std::vector<normal*> adjTriOpNormal1 = e->GetP1()->GetAdjTriOpNormal(),
+					adjTriOpNormal2 = e->GetP2()->GetAdjTriOpNormal();
+
+				if (adjTriOpEdge1.size() == 0 || adjTriOpEdge2.size() == 0) {
+					std::cout << "error: 对面数目为0" << std::endl;
+				}
+				if (adjTriOpEdge1.size() != adjTriOpNormal1.size() || adjTriOpEdge2.size() != adjTriOpNormal2.size()) {
+					std::cout << "error: 不可能出现的错误，边与向量数量不等" << std::endl;
+				}
+				std::cout << adjTriOpEdge1.size() << " " << adjTriOpEdge2.size() << " ";
+				double lengthSum1 = .0, lengthSum2 = .0,
+					lengthMultiNjX1 = .0,
+					lengthMultiNjY1 = .0,
+					lengthMultiNjZ1 = .0,
+					lengthMultiNjX2 = .0,
+					lengthMultiNjY2 = .0,
+					lengthMultiNjZ2 = .0;
+				for (int i = 0; i < adjTriOpEdge1.size(); ++i) {
+					lengthSum1 += adjTriOpEdge1[i]->GetLength();
+					lengthMultiNjX1 += adjTriOpEdge1[i]->GetLength() * adjTriOpNormal1[i]->_x;
+					lengthMultiNjY1 += adjTriOpEdge1[i]->GetLength() * adjTriOpNormal1[i]->_y;
+					lengthMultiNjZ1 += adjTriOpEdge1[i]->GetLength() * adjTriOpNormal1[i]->_z;
+				}
+				double N1X = lengthMultiNjX1 / lengthSum1,
+					N1Y = lengthMultiNjY1 / lengthSum1,
+					N1Z = lengthMultiNjZ1 / lengthSum1;
+				for (int i = 0; i < adjTriOpEdge2.size(); ++i) {
+					lengthSum2 += adjTriOpEdge2[i]->GetLength();
+					lengthMultiNjX2 += adjTriOpEdge2[i]->GetLength() * adjTriOpNormal2[i]->_x;
+					lengthMultiNjY2 += adjTriOpEdge2[i]->GetLength() * adjTriOpNormal2[i]->_y;
+					lengthMultiNjZ2 += adjTriOpEdge2[i]->GetLength() * adjTriOpNormal2[i]->_z;
+				}
+				double N2X = lengthMultiNjX2 / lengthSum2,
+					N2Y = lengthMultiNjY2 / lengthSum2,
+					N2Z = lengthMultiNjZ2 / lengthSum2;
 				// 计算P1点和P2点的法向量
 				double xm = (x1 + x2) / 2,
 					ym = (y1 + y2) / 2,
-					zm = (z1 + z2) / 2;
-					//xn = () / 2,
-					//yn = () / 2,
-					//zn = () / 2,
+					zm = (z1 + z2) / 2,
+					xn = (N1X + N2X) / 2,
+					yn = (N1Y + N2Y) / 2,
+					zn = (N1Z + N2Z) / 2;
+				std::cout << std::endl;
+				// 解一元二次方程，求交点
 			}
 		}
 	}

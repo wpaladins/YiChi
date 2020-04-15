@@ -3,13 +3,17 @@
 #include <iostream>
 
 class edge;
+class normal;
+class facet;
 
 class point
 {
     static int _prePointID;
     int pointID; // 顶点索引
     double _x, _y, _z; // 顶点的三个坐标
-    std::vector<edge*> adjTriEdge;
+    std::vector<facet*> adjTri;
+    std::vector<edge*> adjTriOpEdge;
+    std::vector<normal*> adjTriOpNormal;
 public:
     point():_x(0), _y(0), _z(0) {}
     point(double x, double y, double z) :_x(x), _y(y), _z(z) {
@@ -42,6 +46,24 @@ public:
     }
     double GetZ() {
         return _z;
+    }
+    void AddAdjTri(facet* f) {
+        adjTri.push_back(f);
+    }
+    void AddAdjTriOpEdge(edge* e) {
+        adjTriOpEdge.push_back(e);
+    }
+    void AddAdjTriOpNormal(normal* n) {
+        adjTriOpNormal.push_back(n);
+    }
+    std::vector<facet*> GetAdjTri() {
+        return adjTri;
+    }
+    std::vector<edge*> GetAdjTriOpEdge() {
+        return adjTriOpEdge;
+    }
+    std::vector<normal*> GetAdjTriOpNormal() {
+        return adjTriOpNormal;
     }
 };
 
@@ -90,6 +112,9 @@ public:
             _normal = o._normal;
         }
         return *this;
+    }
+    normal* GetNormalAdd() {
+        return &_normal;
     }
     /*get_1_ring_facets() {
 

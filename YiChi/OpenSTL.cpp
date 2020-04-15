@@ -166,6 +166,18 @@ bool ReadBinary(const char* cfilename)
             e3->putNearTri(_facet);
         }
 
+        // 将点的邻接三角形在点中存下来
+        p1->AddAdjTri(_facet);
+        p2->AddAdjTri(_facet);
+        p3->AddAdjTri(_facet);
+        // 将点在邻接三角形中的对边及对应的法向量在点中存下来
+        p1->AddAdjTriOpEdge(e2); // p1对边为e2
+        p1->AddAdjTriOpNormal(_facet->GetNormalAdd());
+        p2->AddAdjTriOpEdge(e3); // p2对边为e3
+        p2->AddAdjTriOpNormal(_facet->GetNormalAdd());
+        p3->AddAdjTriOpEdge(e1); // p3对边为e1
+        p3->AddAdjTriOpNormal(_facet->GetNormalAdd());
+
         // 将边的两个邻接三角形的其他四个边加到边的数据结构中
         // 将边在两个邻接三角形中的对角角度加到边的数据结构中
         e1->AddAdjTriEdge(e2);

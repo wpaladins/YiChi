@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClCompile Include="AVL.cpp" />
     <ClCompile Include="EdgeAVL.cpp" />
+    <ClCompile Include="EdgeEliminate.cpp" />
     <ClCompile Include="OpenSTL.cpp" />
     <ClCompile Include="YiChi.cpp" />
   </ItemGroup>
@@ -157,6 +158,7 @@
     <ClInclude Include="AVLTree.h" />
     <ClInclude Include="DataStruct.h" />
     <ClInclude Include="EdgeAVL.h" />
+    <ClInclude Include="EdgeEliminate.h" />
     <ClInclude Include="OpenSTL.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

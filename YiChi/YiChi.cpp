@@ -8,6 +8,7 @@
 #include "AVL.h"
 #include "EdgeAVL.h" // EdgeAVL
 //AVLTree--- #include "AVLTree.h"
+#include "EdgeEliminate.h"
 
 using namespace std;
 
@@ -25,6 +26,7 @@ int main()
         std::cout << "顶点数：" << mesh.points.size() << std::endl;
         std::cout << "网格数：" << mesh.facets.size() << std::endl;
         std::cout << "边数：" << mesh.edges.size() << std::endl;
+        EdgeEliminate();
 
 
         //for (int i = 0; i < mesh.points.size(); ++i) {

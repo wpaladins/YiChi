@@ -13,6 +13,7 @@ typedef edge eElemType;
 //¶¨Òå¶þ²æÅÅÐòÊ÷
 typedef struct eBSTNode {
     eElemType data;
+    edge* address;
     int bf;//balance flag
     struct eBSTNode* lchild, * rchild;
     eBSTNode():lchild(NULL),rchild(NULL),bf(0){}
@@ -22,6 +23,6 @@ void eR_Rotate(eBSTree* p);
 void eL_Rotate(eBSTree* p);
 void eLeftBalance(eBSTree* T);
 void eRightBalance(eBSTree* T);
-int eInsertAVL(eBSTree* T, eElemType e, bool* taller);
+int eInsertAVL(eBSTree* T, eElemType e, edge* add, bool* taller);
 bool eFindNode(eBSTree root, eElemType e, eBSTree* pos);
 void eInorderTra(eBSTree root);

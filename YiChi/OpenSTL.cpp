@@ -118,13 +118,13 @@ bool ReadBinary(const char* cfilename)
         if(!eFindNode(eRoot, *e1, &ePos)) { // BSTree---
             // 没有找到
             e1->putNearTri(_facet);
-            eInsertAVL(&eRoot, *e1, &eTaller);
-            mesh.edges.push_back(*e1);
+            eInsertAVL(&eRoot, *e1, e1, &eTaller);
+            mesh.edges.push_back(e1);
         }
         else {
             // 找到了
             edge* temp = e1;
-            e1 = &ePos->data;
+            e1 = ePos->address;
             delete temp;
             e1->putNearTri(_facet);
         }
@@ -137,12 +137,12 @@ bool ReadBinary(const char* cfilename)
         }
         if (!eFindNode(eRoot, *e2, &ePos)) {
             e2->putNearTri(_facet);
-            eInsertAVL(&eRoot, *e2, &eTaller);
-            mesh.edges.push_back(*e2);
+            eInsertAVL(&eRoot, *e2, e2, &eTaller);
+            mesh.edges.push_back(e2);
         }
         else {
             edge* temp = e2;
-            e2 = &ePos->data;
+            e2 = ePos->address;
             delete temp;
             e2->putNearTri(_facet);
         }
@@ -156,15 +156,31 @@ bool ReadBinary(const char* cfilename)
         //AVLTree--- if (edgeAVLTree.Insert(*e3, *e3)) {
         if (!eFindNode(eRoot, *e3, &ePos)) { // BSTree---
             e3->putNearTri(_facet);
-            eInsertAVL(&eRoot, *e3, &eTaller);
-            mesh.edges.push_back(*e3);
+            eInsertAVL(&eRoot, *e3, e3, &eTaller);
+            mesh.edges.push_back(e3);
         }
         else {
             edge* temp = e3;
-            e3 = &ePos->data;
+            e3 = ePos->address;
             delete temp;
             e3->putNearTri(_facet);
         }
+
+        // 将边的两个邻接三角形的其他四个边加到边的数据结构中
+        // 将边在两个邻接三角形中的对角角度加到边的数据结构中
+        e1->AddAdjTriEdge(e2);
+        e1->AddAdjTriEdge(e3);
+        e1->AddAlpheBeta(e2, e3);
+        e1->AddAdjTriPoint(p3);
+        e2->AddAdjTriEdge(e1);
+        e2->AddAdjTriEdge(e3);
+        e2->AddAlpheBeta(e1, e3);
+        e2->AddAdjTriPoint(p1);
+        e3->AddAdjTriEdge(e1);
+        e3->AddAdjTriEdge(e2);
+        e3->AddAlpheBeta(e1, e2);
+        e3->AddAdjTriPoint(p2);
+
         in.read((char*)coorXYZ, 2);
     }
 

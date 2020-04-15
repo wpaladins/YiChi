@@ -155,7 +155,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AVL.h" />
-    <ClInclude Include="AVLTree.h" />
     <ClInclude Include="DataStruct.h" />
     <ClInclude Include="EdgeAVL.h" />
     <ClInclude Include="EdgeEliminate.h" />

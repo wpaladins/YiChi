@@ -74,35 +74,35 @@ bool ReadBinary(const char* cfilename)
         if (!FindNode(root, *p1, &pos)) {
             // 没找到的话
             p1 = new point(coorXYZ[3], coorXYZ[4], coorXYZ[5]);
-            InsertAVL(&root, *p1, &taller);
-            mesh.points.push_back(*p1);
+            InsertAVL(&root, *p1, p1, &taller);
+            mesh.points.push_back(p1);
         }
         else {
             // 找到了的话
             delete p1;
-            p1 = &pos->data;
+            p1 = pos->address;
         }
         point *p2 = new point(coorXYZ[6], coorXYZ[7], coorXYZ[8], false);
         if (!FindNode(root, *p2, &pos)) {
             p2 = new point(coorXYZ[6], coorXYZ[7], coorXYZ[8]);
-            InsertAVL(&root, *p2, &taller);
-            mesh.points.push_back(*p2);
+            InsertAVL(&root, *p2, p2, &taller);
+            mesh.points.push_back(p2);
         }
         else {
             delete p2;
-            p2 = &pos->data;
+            p2 = pos->address;
         }
         point *p3 = new point(coorXYZ[9], coorXYZ[10], coorXYZ[11], false);
         if (!FindNode(root, *p3, &pos)) {
             p3 = new point(coorXYZ[9], coorXYZ[10], coorXYZ[11]);
-            InsertAVL(&root, *p3, &taller);
-            mesh.points.push_back(*p3);
+            InsertAVL(&root, *p3, p3, &taller);
+            mesh.points.push_back(p3);
         }
         else {
             delete p3;
-            p3 = &pos->data;
+            p3 = pos->address;
         }
-        facet _facet(p1->GetID(), p2->GetID(), p3->GetID(), _normal);
+        facet* _facet = new facet(p1->GetID(), p2->GetID(), p3->GetID(), _normal);
         mesh.facets.push_back(_facet);
 
         // 边操作

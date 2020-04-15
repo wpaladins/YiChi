@@ -11,6 +11,7 @@ class point
     double _x, _y, _z; // 顶点的三个坐标
     std::vector<edge*> adjTriEdge;
 public:
+    point():_x(0), _y(0), _z(0) {}
     point(double x, double y, double z) :_x(x), _y(y), _z(z) {
         pointID = _prePointID++;
     }
@@ -160,8 +161,8 @@ public:
         // std::cout << "邻接三角形不是两个，无法计算曲率权值" << alpheBeta.size() << std::endl;
         return 0;
     }
-    void putNearTri(facet& _facet) {
-        nearTri.push_back(&_facet);
+    void putNearTri(facet* _facet) {
+        nearTri.push_back(_facet);
     }
     void AddAdjTriEdge(edge* e) {
         adjTriEdge.push_back(e);
@@ -194,8 +195,8 @@ public:
 class triangle_mesh
 {
 public:
-    std::vector<point> points; // 点集
-    std::vector<facet> facets; // 三角形集
+    std::vector<point*> points; // 点集
+    std::vector<facet*> facets; // 三角形集
     std::vector<edge*> edges;
     /*get_pointsv() {
         

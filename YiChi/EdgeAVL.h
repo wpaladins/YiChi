@@ -16,7 +16,6 @@ typedef struct eBSTNode {
     edge* address;
     int bf;//balance flag
     struct eBSTNode* lchild, * rchild;
-    eBSTNode():lchild(NULL),rchild(NULL),bf(0){}
 }*eBSTree, eBSTNode;
 
 void eR_Rotate(eBSTree* p);

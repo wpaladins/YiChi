@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AVL.cpp" />
+    <ClCompile Include="DataStruct.cpp" />
     <ClCompile Include="EdgeAVL.cpp" />
     <ClCompile Include="EdgeEliminate.cpp" />
     <ClCompile Include="OpenSTL.cpp" />

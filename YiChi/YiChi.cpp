@@ -22,11 +22,15 @@ eBSTree eRoot = NULL; // EdgeAVL
 int main()
 {
     if (ReadSTLFile("H:\\YJ\\bysj\\rec\\test.stl")) {
-        std::cout << "成功" << std::endl;
-        std::cout << "顶点数：" << mesh.points.size() << std::endl;
-        std::cout << "网格数：" << mesh.facets.size() << std::endl;
-        std::cout << "边数：" << mesh.edges.size() << std::endl;
-        //EdgeEliminate();
+        std::cout << "提取成功" << " " 
+            << "顶点数：" << mesh.points.size() << " "
+            << "网格数：" << mesh.facets.size() << " "
+            << "边数：" << mesh.edges.size() << std::endl;
+        EdgeEliminate();
+        std::cout << "边消除后" << " "
+            << "顶点数：" << mesh.points.size() << " "
+            << "网格数：" << mesh.facets.size() << " "
+            << "边数：" << mesh.edges.size() << std::endl;
 
 
         //for (int i = 0; i < mesh.points.size(); ++i) {

@@ -102,7 +102,7 @@ bool ReadBinary(const char* cfilename)
             delete p3;
             p3 = pos->address;
         }
-        facet* _facet = new facet(p1->GetID(), p2->GetID(), p3->GetID(), _normal);
+        facet* _facet = new facet(p1, p2, p3, _normal);
         mesh.facets.push_back(_facet);
 
         // 边操作
@@ -117,7 +117,7 @@ bool ReadBinary(const char* cfilename)
         }
         if(!eFindNode(eRoot, *e1, &ePos)) { // BSTree---
             // 没有找到
-            e1->putNearTri(_facet);
+            e1->AddAdjTri(_facet);
             eInsertAVL(&eRoot, *e1, e1, &eTaller);
             mesh.edges.push_back(e1);
         }
@@ -126,8 +126,11 @@ bool ReadBinary(const char* cfilename)
             edge* temp = e1;
             e1 = ePos->address;
             delete temp;
-            e1->putNearTri(_facet);
+            e1->AddAdjTri(_facet);
         }
+        // 将边添加到点的邻接边表中
+        p1->AddAdjEdge(e1);
+        p2->AddAdjEdge(e1);
         edge* e2;
         if (*p3 < *p2) {
             e2 = new edge(p2, p3);
@@ -136,7 +139,7 @@ bool ReadBinary(const char* cfilename)
             e2 = new edge(p3, p2);
         }
         if (!eFindNode(eRoot, *e2, &ePos)) {
-            e2->putNearTri(_facet);
+            e2->AddAdjTri(_facet);
             eInsertAVL(&eRoot, *e2, e2, &eTaller);
             mesh.edges.push_back(e2);
         }
@@ -144,8 +147,10 @@ bool ReadBinary(const char* cfilename)
             edge* temp = e2;
             e2 = ePos->address;
             delete temp;
-            e2->putNearTri(_facet);
+            e2->AddAdjTri(_facet);
         }
+        p3->AddAdjEdge(e2);
+        p2->AddAdjEdge(e2);
         edge* e3;
         if (*p1 < *p3) {
             e3 = new edge(p3, p1);
@@ -155,7 +160,7 @@ bool ReadBinary(const char* cfilename)
         }
         //AVLTree--- if (edgeAVLTree.Insert(*e3, *e3)) {
         if (!eFindNode(eRoot, *e3, &ePos)) { // BSTree---
-            e3->putNearTri(_facet);
+            e3->AddAdjTri(_facet);
             eInsertAVL(&eRoot, *e3, e3, &eTaller);
             mesh.edges.push_back(e3);
         }
@@ -163,8 +168,10 @@ bool ReadBinary(const char* cfilename)
             edge* temp = e3;
             e3 = ePos->address;
             delete temp;
-            e3->putNearTri(_facet);
+            e3->AddAdjTri(_facet);
         }
+        p1->AddAdjEdge(e3);
+        p3->AddAdjEdge(e3);
 
         // 将点的邻接三角形在点中存下来
         p1->AddAdjTri(_facet);
@@ -183,15 +190,17 @@ bool ReadBinary(const char* cfilename)
         e1->AddAdjTriEdge(e2);
         e1->AddAdjTriEdge(e3);
         e1->AddAlpheBeta(e2, e3);
-        e1->AddAdjTriPoint(p3);
+        e1->AddAdjTriOpPoint(_facet, p3);
         e2->AddAdjTriEdge(e1);
         e2->AddAdjTriEdge(e3);
         e2->AddAlpheBeta(e1, e3);
-        e2->AddAdjTriPoint(p1);
+        e2->AddAdjTriOpPoint(_facet, p1);
         e3->AddAdjTriEdge(e1);
         e3->AddAdjTriEdge(e2);
         e3->AddAlpheBeta(e1, e2);
-        e3->AddAdjTriPoint(p2);
+        e3->AddAdjTriOpPoint(_facet, p2);
+        // 将三角形的边加入到三角形的数据结构中
+        _facet->SetEdges(e1,e2,e3);
 
         in.read((char*)coorXYZ, 2);
     }

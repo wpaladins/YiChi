@@ -277,23 +277,32 @@ void EdgeEliminate() {
 
 				// 2. 添加
 					// 2.1. 为pm_添加数据结构中的其他值
-				pm_->AddAll(e->GetP1()->GetAdjTri(),
-					e->GetP1()->GetAdjEdge(),
-					e->GetP1()->GetAdjTriOpEdge(),
-					e->GetP1()->GetAdjTriOpNormal(),
-					e);
-				pm_->AddAll(e->GetP2()->GetAdjTri(),
-					e->GetP2()->GetAdjEdge(),
-					e->GetP2()->GetAdjTriOpEdge(),
-					e->GetP2()->GetAdjTriOpNormal(),
-					e);
+				pm_->AddAdjTri(e->GetP1()->GetAdjTri(), ne1, ne2);
+				pm_->AddAdjTri(e->GetP2()->GetAdjTri(), ne1, ne2);
+					// 在这个位置之前，已经将所有三角形更新完毕
+				pm_->AddAdjEdge(e->GetP1()->GetAdjEdge(), e);
+				pm_->AddAdjEdge(e->GetP2()->GetAdjEdge(), e);
+					// 在这个位置之前，已经将所有蓝色的边中需要更新的数据更新完毕
 				pm_->AddAdjEdge(ne1);
 				pm_->AddAdjEdge(ne2); // 邻接边（两条新边）
+					
+				pm_->AddAdjTriOpEdgeAndAdjTriOpNormal(e->GetP1()->GetAdjTriOpEdge(),
+					e->GetP1()->GetAdjTriOpNormal(), e->GetP1());
+				pm_->AddAdjTriOpEdgeAndAdjTriOpNormal(e->GetP2()->GetAdjTriOpEdge(),
+					e->GetP2()->GetAdjTriOpNormal(), e->GetP2());
+					// 注意：在这里之前，ne1和ne2里只有两个端点可以使用
 					// 2.2. 为ne1和ne2添加数据结构中的其他值
 				ne1->AddAll(e->GetAdjTri()[0]->GetEdgesExE(e));
 				ne2->AddAll(e->GetAdjTri()[1]->GetEdgesExE(e));
 
 				// 3. 更改其他受到影响的内容
+				// 粉红色的1号操作和2号操作
+				point* p1ExPm_ = ne1->GetPointExP(pm_),
+					* p2ExPm_ = ne2->GetPointExP(pm_);
+				p1ExPm_->UpdateAdjTriAndAdjEdge(ne1);
+				p2ExPm_->UpdateAdjTriAndAdjEdge(ne2);
+				// 粉红色的3号操作
+				pm_->UpdateAdjEdgeOpPointData();
 			}
 		}
 	}

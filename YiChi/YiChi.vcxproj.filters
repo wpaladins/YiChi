@@ -27,6 +27,12 @@
     <ClCompile Include="EdgeAVL.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="EdgeEliminate.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DataStruct.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OpenSTL.h">
@@ -38,10 +44,10 @@
     <ClInclude Include="AVL.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="AVLTree.h">
+    <ClInclude Include="EdgeAVL.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="EdgeAVL.h">
+    <ClInclude Include="EdgeEliminate.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

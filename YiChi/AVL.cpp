@@ -89,15 +89,17 @@ void RightBalance(BSTree* T)
     }
 }
 
-int InsertAVL(BSTree* T, ElemType e, bool* taller)
+int InsertAVL(BSTree* T, ElemType e, point* add, bool* taller)
 {
     //如果本身为空树，则直接添加 e 为根结点
     if ((*T) == NULL)
     {
-        (*T) = (BSTree)malloc(sizeof(BSTNode));
+        // (*T) = (BSTree)malloc(sizeof(BSTNode));
+        (*T) = new BSTNode();
         if ((*T) != NULL){
             (*T)->bf = EH;
             (*T)->data = e;
+            (*T)->address = add;
             (*T)->lchild = NULL;
             (*T)->rchild = NULL;
             *taller = true;
@@ -113,7 +115,7 @@ int InsertAVL(BSTree* T, ElemType e, bool* taller)
     else if (e < (*T)->data)
     {
         //如果插入过程，不会影响树本身的平衡，则直接结束
-        if (!InsertAVL(&(*T)->lchild, e, taller))
+        if (!InsertAVL(&(*T)->lchild, e, add, taller))
             return 0;
         //判断插入过程是否会导致整棵树的深度 +1
         if (*taller)
@@ -139,7 +141,7 @@ int InsertAVL(BSTree* T, ElemType e, bool* taller)
     //同样，当 e>T->data 时，需要插入到以 T 为根结点的树的右子树中，同样需要做和以上同样的操作
     else
     {
-        if (!InsertAVL(&(*T)->rchild, e, taller))
+        if (!InsertAVL(&(*T)->rchild, e, add, taller))
             return 0;
         if (*taller)
         {

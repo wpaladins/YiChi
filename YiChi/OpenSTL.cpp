@@ -2,6 +2,9 @@
 
 bool ReadASCII(const char* cfilename)
 {
+    std::cout << "error：请使用ASCII方式编码的STL文件" << std::endl;
+    return false;
+
     int i = 0, j = 0, cnt = 0, pCnt = 4;
     char a[100];
     char str[100];
@@ -120,6 +123,9 @@ bool ReadBinary(const char* cfilename)
             e1->AddAdjTri(_facet);
             eInsertAVL(&eRoot, *e1, e1, &eTaller);
             mesh.edges.push_back(e1);
+            // 将边添加到点的邻接边表中
+            p1->AddAdjEdge(e1);
+            p2->AddAdjEdge(e1);
         }
         else {
             // 找到了
@@ -128,9 +134,6 @@ bool ReadBinary(const char* cfilename)
             delete temp;
             e1->AddAdjTri(_facet);
         }
-        // 将边添加到点的邻接边表中
-        p1->AddAdjEdge(e1);
-        p2->AddAdjEdge(e1);
         edge* e2;
         if (*p3 < *p2) {
             e2 = new edge(p2, p3);
@@ -142,6 +145,8 @@ bool ReadBinary(const char* cfilename)
             e2->AddAdjTri(_facet);
             eInsertAVL(&eRoot, *e2, e2, &eTaller);
             mesh.edges.push_back(e2);
+            p3->AddAdjEdge(e2);
+            p2->AddAdjEdge(e2);
         }
         else {
             edge* temp = e2;
@@ -149,8 +154,6 @@ bool ReadBinary(const char* cfilename)
             delete temp;
             e2->AddAdjTri(_facet);
         }
-        p3->AddAdjEdge(e2);
-        p2->AddAdjEdge(e2);
         edge* e3;
         if (*p1 < *p3) {
             e3 = new edge(p3, p1);
@@ -163,6 +166,8 @@ bool ReadBinary(const char* cfilename)
             e3->AddAdjTri(_facet);
             eInsertAVL(&eRoot, *e3, e3, &eTaller);
             mesh.edges.push_back(e3);
+            p1->AddAdjEdge(e3);
+            p3->AddAdjEdge(e3);
         }
         else {
             edge* temp = e3;
@@ -170,8 +175,6 @@ bool ReadBinary(const char* cfilename)
             delete temp;
             e3->AddAdjTri(_facet);
         }
-        p1->AddAdjEdge(e3);
-        p3->AddAdjEdge(e3);
 
         // 将点的邻接三角形在点中存下来
         p1->AddAdjTri(_facet);

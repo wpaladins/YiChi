@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <unordered_map>
+#include <stack>
 #include <iostream>
 
 class edge;
@@ -13,9 +14,10 @@ class point
     int pointID; // 顶点索引
     double _x, _y, _z; // 顶点的三个坐标
     std::vector<facet*> adjTri;
-    std::vector<edge*> adjEdge;
+    std::vector<edge*> adjEdge; // 邻接边，即以这个点作为端点的边
     std::vector<edge*> adjTriOpEdge;
     std::vector<normal*> adjTriOpNormal;
+    std::vector<point*> adjPoint;
     bool _isDeleted;
 public:
     point():_x(0), _y(0), _z(0), pointID(0), _isDeleted(false){}
@@ -81,11 +83,11 @@ public:
     bool GetDeleted() {
         return _isDeleted;
     }
-    void AddAdjTriOpEdgeAndAdjTriOpNormal(std::vector<edge*> oeV,
-        std::vector<normal*> onV, point* op);
+    void AddAdjTriOpEdgeAndAdjTriOpNormal(point* op);
     void UpdateAdjTriAndAdjEdge(edge* ne);
     void UpdateAdjTriOpEdgeAndAdjTriOpNormal();
     void UpdateAdjEdgeOpPointData();
+    void SetAdjPoint();
 };
 
 class normal
@@ -115,7 +117,7 @@ class facet
     edge* _edge1, * _edge2, * _edge3;
     bool _isDeleted;
 public:
-    facet(point* v1, point* v2, point* v3, normal normal):_p1(v1), _p2(v2), _p3(v3), _normal(normal) {
+    facet(point* v1, point* v2, point* v3, normal normal):_p1(v1), _p2(v2), _p3(v3), _normal(normal), _edge1(nullptr), _edge2(nullptr), _edge3(nullptr) {
         faceID = _preFaceID++;
         _isDeleted = false;
     }
@@ -164,19 +166,21 @@ public:
         result.push_back(_edge3);
         return result;
     }
-    std::vector<edge*> GetEdgesExE(edge* e) {
+    std::vector<edge*> GetEdgesExE(edge* e, edge* ne) {
         std::vector<edge*> result;
-        if (_edge1 != e) {
+        // bool _edge1Result = false, _edge2Result = false, _edge3Result = false;
+        if (_edge1 != e && _edge1 != ne) {
             result.push_back(_edge1);
         }
-        if (_edge2 != e) {
+        if (_edge2 != e && _edge2 != ne) {
             result.push_back(_edge2);
         }
-        if (_edge3 != e) {
+        if (_edge3 != e && _edge3 != ne) {
             result.push_back(_edge3);
         }
-        if (result.size() != 2) {
-            std::cout << "error: 不可能出现的错误，GetEdgeExE" << std::endl;
+        /****result.size()可能为1****/
+        if (result.size() != 2 && result.size() != 1) {
+            std::cout << "error: 不可能出现的错误，GetEdgesExE" << std::endl;
         }
         return result;
     }
@@ -188,6 +192,14 @@ public:
         return false;
     }
     edge* GetEdgeOpP(point* p);
+    point* GetPointExE(edge* e);
+    std::vector<point*> GetPoints() {
+        std::vector<point*> pointsAdd;
+        pointsAdd.push_back(_p1);
+        pointsAdd.push_back(_p2);
+        pointsAdd.push_back(_p3);
+        return pointsAdd;
+    }
 };
 
 class edge
@@ -206,20 +218,31 @@ public:
             (_p1->GetY() - _p2->GetY()) * (_p1->GetY() - _p2->GetY()) +
             (_p1->GetZ() - _p2->GetZ()) * (_p1->GetZ() - _p2->GetZ())); // 长度
     }
-    void AddAll(std::vector<edge*> oldEV) {
-        // oldEV是原来两条边
+    void AddAll(std::vector<edge*> oldEV, edge* ne) {
+        // oldEV是当前处理的边e的某一个邻接三角形中其他两条边
         for (auto olde: oldEV) {
             for (auto oldAdjTri: olde->GetAdjTri()) {
-                if (!oldAdjTri->GetDeleted()) {
+                if (oldAdjTri->GetDeleted() == false) {
                     adjTri.push_back(oldAdjTri);
-                    std::vector<edge*> edgesExOldE = oldAdjTri->GetEdgesExE(olde);
+                    bool flag = true;// flag为true说明是ne1
+                    std::vector<edge*> edgesExOldE = oldAdjTri->GetEdgesExE(olde, ne);/*****此处已经将邻接三角形的顶点和边换成了新的点和边*****/
                     for (auto oldAdjTriEdge : edgesExOldE) {
                         adjTriEdges.push_back(oldAdjTriEdge);
                     }
                     // 更新alpheBeta
-                    AddAlpheBeta(edgesExOldE[0],edgesExOldE[1]);
+                    if (edgesExOldE.size() == 2) {
+                        AddAlpheBeta(edgesExOldE[0], edgesExOldE[1]);
+                    }
+                    else if (edgesExOldE.size() == 1) {
+                        AddAlpheBeta(edgesExOldE[0], ne);
+                    }
+                    else {
+                        std::cout << "error: 不可能出现的错误，edge::AddAll" << std::endl;
+                    }
+                    
                 }
             }
+            // 添加边在邻接三角形中的对点
             for (auto temp : olde->GetAdjTriOpPointExE(this)) {
                 adjTriOpPoint.insert(temp);
             }
@@ -313,13 +336,13 @@ public:
     std::unordered_map<facet*, point*> GetAdjTriOpPointExE(edge* e) {
         std::unordered_map<facet*, point*> result;
         for (auto m: adjTriOpPoint) {
-            if (m.second != e->GetP1() && m.second != e->GetP2()) {
+            if (m.second != e->GetP1() && m.second != e->GetP2() && m.second->GetDeleted() == false) {
                 result.insert(m);
             }
         }
-        if (result.size() != 1) {
+        /*if (result.size() != 1) {
             std::cout << "error: 不可能出现的错误，GetAdjTriOpPointExE" << std::endl;
-        }
+        }*/
         return result;
     }
     void SetDeleted() {
@@ -358,6 +381,7 @@ public:
         }
         else {
             std::cout << "error: 不可能出现的错误，GetPointExP" << std::endl;
+            return nullptr;
         }
     }
     void UpdateAdjTriEdgesAndAlpheBeta() {
@@ -365,7 +389,7 @@ public:
         adjTriEdges.clear();
         alpheBeta.clear();
         for (auto f: adjTri) {
-            std::vector<edge*> eV = f->GetEdgesExE(this);
+            std::vector<edge*> eV = f->GetEdgesExE(this, this);
             if (eV.size() == 2) {
                 adjTriEdges.push_back(eV[0]);
                 adjTriEdges.push_back(eV[1]);
@@ -377,13 +401,31 @@ public:
         }
     }
     void UpdateAdjTriOpPoint(point* p, point* op) {
-        for (auto temp: adjTriOpPoint) {
-            if (temp.second == op) {
-                adjTriOpPoint.insert({temp.first, p});
-                adjTriOpPoint.erase(temp.first);
+        /***注意这里迭代器会被insert操作破坏掉***/
+        facet* f = nullptr;
+        for (auto temp : adjTriOpPoint) {
+            if (temp.second == op || temp.second == p) {
+                f = temp.first;
             }
         }
-        if (adjTriOpPoint.size() != 2) {
+        if (f == nullptr) {
+            std::cout << "error: 不可能出现的错误，UpdateAdjTriOpPoint1" << std::endl;
+        }
+        else {
+            adjTriOpPoint[f] = p;
+        }
+        // 做边界边处可以出现adjTriOpPoint.size() == 1
+        /*if (adjTriOpPoint.size() != 1 && adjTriOpPoint.size() != 2) {
+            std::cout << "error: 不可能出现的错误，UpdateAdjTriOpPoint2" << std::endl;
+        }*/
+    }
+    void UpdateAdjTriOpPoint() {
+        // 使用当前的adjTri对adjTriOpPoint进行更新整理
+        adjTriOpPoint.clear();
+        for (facet* f: adjTri) {
+            adjTriOpPoint.insert({f,f->GetPointExE(this)});
+        }
+        if (adjTriOpPoint.size() != adjTri.size()) {
             std::cout << "error: 不可能出现的错误，UpdateAdjTriOpPoint" << std::endl;
         }
     }
@@ -401,10 +443,9 @@ class triangle_mesh
 public:
     std::vector<point*> points; // 点集
     std::vector<facet*> facets; // 三角形集
-    std::vector<edge*> edges;
-    int pointAmount;
-    int facetAmount;
-    int edgeAmount;
+    std::vector<edge*> edges; // 边集
+    std::vector<point*> pointsTemp; // 临时点集
+    std::vector<edge*> edgesTemp; // 临时边集
     int GetPointAmount() {
         int amount = 0;
         for (auto p: points) {
@@ -431,5 +472,64 @@ public:
             }
         }
         return amount;
+    }
+    void PrintEdgeLength() {
+        for (auto e : edges) {
+            std::cout << e->GetLength() << " ";
+        }
+    }
+    void PrintNoBoundPointAdjTriAmount() {
+        for (auto p: points) {
+            if (p->GetAdjTri().size() == p->GetAdjEdge().size()) {
+                std::cout << p->GetAdjTri().size() << " ";
+            }
+        }
+    }
+    void DataDeleteAndDataMerge() {
+        // 数据删除：将mesh.points和mesh.facets和mesh.edges中已经删除点和边进行物理删除
+        std::stack<int> subs;
+        for (int i = 0; i < points.size(); ++i) {
+            if (points[i]->GetDeleted()) {
+                subs.push(i);
+            }
+        }
+        while (!subs.empty()) {
+            if (!points[subs.top()]->GetDeleted()) {
+                std::cout << "error: DataDeleteAndDataMerge1" << std::endl;
+            }
+            points.erase(points.begin() + subs.top());
+            subs.pop();
+        }
+        for (int i = 0; i < facets.size(); ++i) {
+            if (facets[i]->GetDeleted()) {
+                subs.push(i);
+            }
+        }
+        while (!subs.empty()) {
+            if (!facets[subs.top()]->GetDeleted()) {
+                std::cout << "error: DataDeleteAndDataMerge2" << std::endl;
+            }
+            facets.erase(facets.begin() + subs.top());
+            subs.pop();
+        }
+        for (int i = 0; i < edges.size(); ++i) {
+            if (edges[i]->GetDeleted()) {
+                subs.push(i);
+            }
+        }
+        while (!subs.empty()) {
+            if (!edges[subs.top()]->GetDeleted()) {
+                std::cout << "error: DataDeleteAndDataMerge3" << std::endl;
+            }
+            edges.erase(edges.begin() + subs.top());
+            subs.pop();
+        }
+        // 数据合并：mesh.pointsTemp和mesh.edgesTemp中的数据合并到mesh.points和mesh.edges中
+        for (auto p: pointsTemp) {
+            points.push_back(p);
+        }
+        for (auto e: edgesTemp) {
+            edges.push_back(e);
+        }
     }
 };

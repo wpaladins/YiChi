@@ -151,6 +151,7 @@
     <ClCompile Include="DataStruct.cpp" />
     <ClCompile Include="EdgeAVL.cpp" />
     <ClCompile Include="EdgeEliminate.cpp" />
+    <ClCompile Include="EdgeExchange.cpp" />
     <ClCompile Include="OpenSTL.cpp" />
     <ClCompile Include="YiChi.cpp" />
   </ItemGroup>
@@ -159,6 +160,7 @@
     <ClInclude Include="DataStruct.h" />
     <ClInclude Include="EdgeAVL.h" />
     <ClInclude Include="EdgeEliminate.h" />
+    <ClInclude Include="EdgeExchange.h" />
     <ClInclude Include="OpenSTL.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

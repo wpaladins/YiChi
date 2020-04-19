@@ -2,8 +2,6 @@
 #include "EdgeEliminate.h"
 #include <iostream>
 
-int times = 0;
-
 double det[4][4];
 // 计算四阶行列式
 double calc_det() {
@@ -58,6 +56,7 @@ double calc_distance(double x1, double y1, double z1, double x2, double y2, doub
 }
 
 void EdgeEliminate() {
+	times = 0;
 	for (int i = 0; i < mesh.edges.size(); ++i) {
 		edge* e = mesh.edges[i];
 		point* ep1 = e->GetP1();
@@ -71,7 +70,7 @@ void EdgeEliminate() {
 			(ep2->GetAdjTri().size() != ep2->GetAdjEdge().size())) {
 			continue;
 		}
-		// 如果边的邻接三角形的数目小于3，就跳过
+		// 如果边的两个端点的邻接三角形的数目小于3，就跳过
 		if (ep1->GetAdjTri().size() < 3 || ep2->GetAdjTri().size() < 3) {
 			continue;
 		}
@@ -81,7 +80,6 @@ void EdgeEliminate() {
 			if (curvatureWeight > 3) { // 特征阈值
 				// 进行边消除
 
-				// std::cout << "运行" << std::endl;
 				times++;
 				
 				// 组织并计算行列式
@@ -95,7 +93,7 @@ void EdgeEliminate() {
 					z1 = ep1->GetZ(),
 					x2 = ep2->GetX(),
 					y2 = ep2->GetY(),
-					z2 = ep2->GetY(),
+					z2 = ep2->GetZ(),
 					x3 = e->GetAdjTriOpPoint()[e->GetAdjTri()[0]]->GetX(),
 					y3 = e->GetAdjTriOpPoint()[e->GetAdjTri()[0]]->GetY(),
 					z3 = e->GetAdjTriOpPoint()[e->GetAdjTri()[0]]->GetZ(),
@@ -123,7 +121,24 @@ void EdgeEliminate() {
 				det[1][3] = 1;
 				det[2][3] = 1;
 				det[3][3] = 1;
-				double A = calc_det();
+				// debug 
+				/*det[0][0] = -8.53;
+				det[0][1] = -8.16;
+				det[0][2] = 5.34;
+				det[0][3] = 1;
+				det[1][0] = -8.54;
+				det[1][1] = -8.08;
+				det[1][2] = 5.33;
+				det[1][3] = 1;
+				det[2][0] = -8.41;
+				det[2][1] = -8.14;
+				det[2][2] = 5.18;
+				det[2][3] = 1;
+				det[3][0] = -8.64;
+				det[3][1] = -8.08;
+				det[3][2] = 5.40;
+				det[3][3] = 1;*/
+				double A = calc_det(); //debug A = [-8.53 -8.16 5.34 1;-8.54 -8.08 5.33 1;-8.41 -8.14 5.18 1;-8.64 -8.08 5.40 1]
 				// 2. x的系数B
 				det[0][0] = t1;
 				det[1][0] = t2;
@@ -246,7 +261,7 @@ void EdgeEliminate() {
 				
 				// 解一元二次方程的系数和常数
 				double a = A * (xn * xn + yn * yn + zn * zn),
-					b = 2 * xm * xn +2 * ym * yn + 2 * zm * zn - B * xm + C * yn - D * zn ,
+					b = 2 * xm * xn +2 * ym * yn + 2 * zm * zn - B * xn + C * yn - D * zn ,
 					c = A * xm * xm + A * ym * ym + A * zm * zm - B * xm + C * ym - D * zm + E;
 				// 解一元二次方程，求交点
 				double delte = b * b - 4 * a * c, result1 = 0, result2 = 0;
@@ -285,18 +300,6 @@ void EdgeEliminate() {
 				edge* ne1 = new edge(pm_, e->GetAdjTriOpPoint()[e->GetAdjTri()[0]]),
 					* ne2 = new edge(pm_, e->GetAdjTriOpPoint()[e->GetAdjTri()[1]]);
 
-				// debug
-				/*if (ep1->GetAdjTri().size() == 3 || ep2->GetAdjTri().size() == 3) {
-					std::cout << "debug1" << std::endl;
-				}
-				else {
-					std::cout << "debug0" << std::endl;
-				}*/
-
-				/*if (times == 934) {
-					std::cout << "debug" << std::endl;
-				}*/
-
 				// 1. 删除
 					// 1.1. 删邻接三角形（包括邻接三角形的所有边）
 				e->GetAdjTri()[0]->SetDeleted();// 1.2. 删自己e->SetDeleted();
@@ -332,21 +335,21 @@ void EdgeEliminate() {
 				// 粉红色的3号操作
 				pm_->UpdateAdjEdgeOpPointData();
 
-				// 将新建的点和边加入到全局变量的集合中*****************************************************************************
+				// 将新建的点和边加入到全局变量的集合中
 				mesh.pointsTemp.push_back(pm_);
 				mesh.edgesTemp.push_back(ne1);
 				mesh.edgesTemp.push_back(ne2);
 
 				// debug输出STL
-				char buff[100], buffT[100];
-				strcpy(buff, "debug");
+				/*char buff[100], buffT[100];
+				strcpy(buff, "EdgeEliminateDebug");
 				sprintf(buffT, "%d", times);
 				strcat(buff, buffT);
-				OutputSTL("H:\\YJ\\bysj\\rec\\", buff);
+				OutputSTL("H:\\YJ\\bysj\\rec\\", buff);*/
 			}//if
 		}
 	}
 	// 数据删除：将mesh.points和mesh.edges中已经删除点和边进行物理删除
 	// 数据合并：mesh.pointsTemp和mesh.edgesTemp中的数据合并到mesh.points和mesh.edges中
-	mesh.DataDeleteAndDataMerge();
+	mesh.DataDeleteAndDataMerge1();
 }

@@ -1,6 +1,7 @@
 ﻿// YiChi.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
 //
 
+#pragma warning(disable : 4244)
 #include <iostream>
 #include <vector>
 #include "OpenSTL.h"
@@ -8,6 +9,7 @@
 #include "AVL.h"
 #include "EdgeAVL.h"
 #include "EdgeEliminate.h"
+#include "EdgeExchange.h"
 
 using namespace std;
 
@@ -16,30 +18,39 @@ int point::_prePointID = 0;
 int facet::_preFaceID = 0;
 BSTree root = NULL;
 eBSTree eRoot = NULL;
+int times = 0;
 
 void OutputSTL(const char* pathname, const char* filename);
 
 int main()
 {
     int oPointsSize, oFacetsSize, oEdgesSize;
-    if (ReadSTLFile("H:\\YJ\\bysj\\rec\\input\\test.stl")) {
+    if (ReadBinary("H:\\YJ\\bysj\\rec\\EdgeEliminateOut.stl")) {
         oPointsSize = mesh.points.size();
         oFacetsSize = mesh.facets.size();
         oEdgesSize = mesh.edges.size();
-        std::cout << "数据读成功" << " " 
+        std::cout << "数据读成功" << " "
             << "顶点数：" << oPointsSize << " "
             << "网格数：" << oFacetsSize << " "
             << "边数：" << oEdgesSize << std::endl;
         // mesh.PrintEdgeLength();
         // mesh.PrintNoBoundPointAdjTriAmount();
         // OutputSTL("H:\\YJ\\bysj\\rec\\", "out1");
-        EdgeEliminate();
+        
+        // 边消除调用
+        /*EdgeEliminate();
         std::cout << "边消除成功" << " "
             << "顶点减少了" << oPointsSize - mesh.points.size() << "个 "
             << "网格减少了" << oFacetsSize - mesh.facets.size() << "个 "
-            << "边数减少了" << oEdgesSize - mesh.edges.size() << "个 " << std::endl;
+            << "边数减少了" << oEdgesSize - mesh.edges.size() << "个 " << std::endl;*/
+        
+        // 边交换调用
+        EdgeExchange();
+        std::cout << "边交换成功" << " "
+            << "边交换了" << mesh.EdgeExchangeTimes << "次 " << std::endl;
+        
         /// 输出为STL进行查看
-        OutputSTL("H:\\YJ\\bysj\\rec\\", "out");
+        OutputSTL("H:\\YJ\\bysj\\rec\\", "FinnalOut");
     }
 }
 

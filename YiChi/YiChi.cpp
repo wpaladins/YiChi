@@ -25,7 +25,12 @@ void OutputSTL(const char* pathname, const char* filename);
 int main()
 {
     int oPointsSize, oFacetsSize, oEdgesSize;
-    if (ReadBinary("H:\\YJ\\bysj\\rec\\EdgeEliminateOut.stl")) {
+
+    /*注意：当前代码先进行边消除，再进行边交换，一次运行即可完成*/
+    const char inputSTLPathAndFile[] = "H:\\YJ\\bysj\\rec\\input\\test1.stl"; // 输入的STL文件
+    const char outputSTLPath[] = "H:\\YJ\\bysj\\rec\\"; // 需要输出STL文件的目录
+
+    if (ReadBinary(inputSTLPathAndFile)) {
         oPointsSize = mesh.points.size();
         oFacetsSize = mesh.facets.size();
         oEdgesSize = mesh.edges.size();
@@ -35,14 +40,20 @@ int main()
             << "边数：" << oEdgesSize << std::endl;
         // mesh.PrintEdgeLength();
         // mesh.PrintNoBoundPointAdjTriAmount();
-        // OutputSTL("H:\\YJ\\bysj\\rec\\", "out1");
+        // OutputSTL("H:\\YJ\\bysj\\rec\\", "out-debug");
         
         // 边消除调用
-        /*EdgeEliminate();
+        EdgeEliminate();
         std::cout << "边消除成功" << " "
             << "顶点减少了" << oPointsSize - mesh.points.size() << "个 "
             << "网格减少了" << oFacetsSize - mesh.facets.size() << "个 "
-            << "边数减少了" << oEdgesSize - mesh.edges.size() << "个 " << std::endl;*/
+            << "边数减少了" << oEdgesSize - mesh.edges.size() << "个 " << std::endl;
+        OutputSTL(outputSTLPath, "EdgeEliminateOut");
+        mesh.clear();
+        char buff[100];
+        strcpy(buff, outputSTLPath);
+        strcat(buff, "EdgeEliminateOut.stl");
+        ReadBinary(buff);
         
         // 边交换调用
         EdgeExchange();
@@ -50,7 +61,7 @@ int main()
             << "边交换了" << mesh.EdgeExchangeTimes << "次 " << std::endl;
         
         /// 输出为STL进行查看
-        OutputSTL("H:\\YJ\\bysj\\rec\\", "FinnalOut");
+        OutputSTL(outputSTLPath, "FinnalOut");
     }
 }
 
@@ -75,24 +86,36 @@ void OutputSTL(const char* pathname, const char* filename)
 
     for (int i = 0; i < m_TriaNum; i++)
     {
-        normal* nAdd = mesh.facets[i]->GetNormalAdd();
-        dat[0] = nAdd->_x;
-        dat[1] = nAdd->_y;
-        dat[2] = nAdd->_z;
-
         vector<point*> pointsAdd = mesh.facets[i]->GetPoints();
+        double v1x = pointsAdd[0]->GetX(),
+            v1y = pointsAdd[0]->GetY(),
+            v1z = pointsAdd[0]->GetZ(),
+            v2x = pointsAdd[1]->GetX(),
+            v2y = pointsAdd[1]->GetY(),
+            v2z = pointsAdd[1]->GetZ(),
+            v3x = pointsAdd[2]->GetX(),
+            v3y = pointsAdd[2]->GetY(),
+            v3z = pointsAdd[2]->GetZ();
+        double nx = (v1y - v3y) * (v2z - v3z) - (v1z - v3z) * (v2y - v3y),
+            ny = (v1z - v3z) * (v2x - v3x) - (v2z - v3z) * (v1x - v3x),
+            nz = (v1x - v3x) * (v2y - v3y) - (v2x - v3x) * (v1y - v3y);
+        double length = sqrt(nx * nx + ny * ny + nz * nz);
+        
+        dat[0] = nx / length;
+        dat[1] = ny / length;
+        dat[2] = nz / length;
 
-        dat[3] = pointsAdd[0]->GetX();
-        dat[4] = pointsAdd[0]->GetY();
-        dat[5] = pointsAdd[0]->GetZ();
+        dat[3] = v1x;
+        dat[4] = v1y;
+        dat[5] = v1z;
 
-        dat[6] = pointsAdd[1]->GetX();
-        dat[7] = pointsAdd[1]->GetY();
-        dat[8] = pointsAdd[1]->GetZ();
+        dat[6] = v2x;
+        dat[7] = v2y;
+        dat[8] = v2z;
 
-        dat[9] = pointsAdd[2]->GetX();
-        dat[10] = pointsAdd[2]->GetY();
-        dat[11] = pointsAdd[2]->GetZ();
+        dat[9] = v3x;
+        dat[10] = v3y;
+        dat[11] = v3z;
 
         fwrite(dat, sizeof(float), 12, fp);
         fwrite("wl", sizeof(char), 2, fp);

@@ -141,8 +141,20 @@ void point::SetAdjPoint() {
 facet::facet(edge* newE, edge* oldE, point* oldP) {
     // 点
     _p1 = oldP;
-    _p2 = newE->GetP1();
-    _p3 = newE->GetP2();
+    /**注意：由于输出STL时要通过点的顺序来确定normal的方向，因此必须保证点的顺序**/
+    std::vector<point*> pOrder1 = oldE->GetAdjTri()[0]->GetPointOrderStartWithP(oldP);
+    std::vector<point*> pOrder2 = oldE->GetAdjTri()[1]->GetPointOrderStartWithP(oldP);
+    if (pOrder1[1] == pOrder2[2]) {
+        _p2 = pOrder2[1];
+        _p3 = pOrder1[2];
+    }
+    else if(pOrder1[2] == pOrder2[1]) {
+        _p2 = pOrder1[1];
+        _p3 = pOrder2[2];
+    }
+    else {
+        std::cout << "error: 不可能出现的错误，新建facet时错误0" << std::endl;
+    }
 
     // 找到边的索引
     std::vector<edge*> newEV;
@@ -158,67 +170,9 @@ facet::facet(edge* newE, edge* oldE, point* oldP) {
     _edge2 = newEV[0];
     _edge3 = newEV[1];
 
-    // 计算并设置normal
-    normal* normal1 = oldE->GetAdjTri()[0]->GetNormalAdd(),
-        * normal2 = oldE->GetAdjTri()[1]->GetNormalAdd();
-    /*
-    double temp1[3], temp2[3];
-    double p1x = _p1->GetX(),
-        p1y = _p1->GetY(),
-        p1z = _p1->GetZ(),
-        p2x = _p2->GetX(),
-        p2y = _p2->GetY(),
-        p2z = _p2->GetZ(),
-        p3x = _p3->GetX(),
-        p3y = _p3->GetY(),
-        p3z = _p3->GetZ();
-    temp1[0] = p2x - p1x;
-    temp1[1] = p2y - p1y;
-    temp1[2] = p2z - p1z;
-    temp2[0] = p3x - p2x;
-    temp2[1] = p3y - p2y;
-    temp2[2] = p3z - p2z;
-    double nx = temp1[1] * temp2[2] - temp1[2] * temp2[1],
-        ny = -(temp1[0] * temp2[2] - temp1[2] * temp2[0]),
-        nz = temp1[0] * temp2[1] - temp1[1] * temp2[0];
-    double length = sqrt(nx * nx + ny * ny + nz * nz);
-    if (length == 0.0f) { length = 1.0f; }
-    _normal.setXYZ(nx / length, ny / length, nz / length);*/
-    _normal.setXYZ(normal1->_x, normal1->_y, normal1->_z);
-    //if (((_normal._x * ((normal2->_x + normal1->_x)/2)) + (_normal._y * ((normal2->_y + normal1->_y) / 2)) + (_normal._z * ((normal2->_z + normal1->_z) / 2))) < 0) {
-    //    _normal.Negate();
-    //    /*std::cout << "钝角1" << std::endl;
-    //    if (((_normal._x * normal2->_x) + (_normal._y * normal2->_y) + (_normal._z * normal2->_z)) > 0) {
-    //        std::cout << "error: 锐角1" << std::endl;
-    //    }*/
-    //}
-    /*else {
-        if (((_normal._x * normal2->_x) + (_normal._y * normal2->_y) + (_normal._z * normal2->_z)) < 0) {
-            std::cout << "error: 钝角2" << std::endl;
-        }
-    }*/
-    /*if ((_normal.GetAngleWithN(*normal1) > 1.5708) && (_normal.GetAngleWithN(*normal2) > 1.5708)) {
-        std::cout << "都大大大大于" << _normal.GetAngleWithN(*normal1) << "#" << _normal.GetAngleWithN(*normal2) << std::endl;
-        _normal.Negate();
-    }
-    else if ((_normal.GetAngleWithN(*normal1) < 1.5708) && (_normal.GetAngleWithN(*normal2) < 1.5708)) {
-        std::cout << "都小小于" << _normal.GetAngleWithN(*normal1) << "#" << _normal.GetAngleWithN(*normal2) << std::endl;
-    }
-    else {
-        std::cout << "不同于" << _normal.GetAngleWithN(*normal1) << "#" << _normal.GetAngleWithN(*normal2) << std::endl;
-    }*/
-    //if (_normal.GetAngleWithN(*normal1) > 1.5708) { // 1.5708为PI/2的近似值
-    //    _normal.Negate();
-    //    if (_normal.GetAngleWithN(*normal2) < 1.5708) {
-    //        std::cout << _normal.GetAngleWithN(*normal1) << "#" << _normal.GetAngleWithN(*normal2) << " ";
-    //        //std::cout << "error: 不可能出现的错误，两个夹角不同为钝角" << std::endl;
-    //    }
-    //}
-    //else {
-    //    if (_normal.GetAngleWithN(*normal2) > 1.5708) {
-    //        std::cout << "error: 不可能出现的错误，两个夹角不同为锐角" << std::endl;
-    //    }
-    //}
+    // normal设置为(0,0,0)
+    _normal.setXYZ(0, 0, 0);
+    /**注意：输出是normal是通过计算得到，所以_normal的存储无用**/
 
     UpdateMiniInnerAngle();
 

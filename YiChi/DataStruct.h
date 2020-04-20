@@ -238,6 +238,28 @@ public:
     double GetMiniInnerAngle() {
         return _miniInnerAngle;
     }
+    std::vector<point*> GetPointOrderStartWithP(point * p) {
+        std::vector<point*> result;
+        if (_p1 == p) {
+            result.push_back(_p1);
+            result.push_back(_p2);
+            result.push_back(_p3);
+        }
+        else if (_p2 == p) {
+            result.push_back(_p2);
+            result.push_back(_p3);
+            result.push_back(_p1);
+        }
+        else if (_p3 == p) {
+            result.push_back(_p3);
+            result.push_back(_p1);
+            result.push_back(_p2);
+        }
+        else {
+            std::cout << "error: 不可能出现的错误，GetPointOrderStartWithP" << std::endl;
+        }
+        return result;
+    }
 };
 
 class edge
@@ -657,5 +679,10 @@ public:
         EdgeExchangeTimes = edgesTemp.size();
         facetsTemp.clear();
         edgesTemp.clear();
+    }
+    void clear() {
+        points.clear(); // 点集
+        facets.clear(); // 三角形集
+        edges.clear(); // 边集
     }
 };

@@ -11,6 +11,7 @@
 //AVLTree--- #include "AVLTree.h"
 
 bool ReadSTLFile(const char* cfilename);
+bool ReadBinary(const char* cfilename);
 
 extern triangle_mesh mesh;
 extern BSTree root;

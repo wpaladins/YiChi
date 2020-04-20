@@ -33,6 +33,9 @@
     <ClCompile Include="DataStruct.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="EdgeExchange.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OpenSTL.h">
@@ -48,6 +51,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="EdgeEliminate.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="EdgeExchange.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,7 +2,7 @@
 
 bool ReadASCII(const char* cfilename)
 {
-    std::cout << "error：请使用ASCII方式编码的STL文件" << std::endl;
+    std::cout << "error：请使用二进制方式编码的STL文件" << std::endl;
     return false;
 
     int i = 0, j = 0, cnt = 0, pCnt = 4;

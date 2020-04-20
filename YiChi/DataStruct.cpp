@@ -51,8 +51,8 @@ void point::AddAdjTriOpEdgeAndAdjTriOpNormal(point* op) {
         }
     }
 }
-void point::UpdateAdjTriAndAdjEdge(edge* ne) {
-    // 删邻接三角形，只需要删一个
+void point::UpdateAdjTriAndAdjEdge(edge* ne) {/**此函数中1.和2.处可以更新为调用UpdateAdjTri()和UpdateAdjEdge()**/
+    // 1. 删邻接三角形，只需要删一个
     /****erase会导致迭代器失效****/
     std::vector<facet*>::iterator delAdjTriAdd = adjTri.end();
     for (auto it = adjTri.begin(); it != adjTri.end(); ++it) {
@@ -67,7 +67,7 @@ void point::UpdateAdjTriAndAdjEdge(edge* ne) {
     else {
         std::cout << "error: 不可能出现的错误，UpdateAdjTriAndAdjEdge1" << std::endl;
     }
-    // 删邻接边，需要删两条边
+    // 2. 删邻接边，需要删两条边
     std::vector<edge*>::iterator delAdjEdgeAdd = adjEdge.end();
     for (auto it = adjEdge.begin(); it != adjEdge.end(); ++it) {
         if ((*it)->GetDeleted()) {
@@ -94,8 +94,34 @@ void point::UpdateAdjTriAndAdjEdge(edge* ne) {
     else {
         std::cout << "error: 不可能出现的错误，UpdateAdjTriAndAdjEdge3" << std::endl;
     }
-    // 加邻接边，只需要加一条
+    // 3. 加邻接边，只需要加一条
     adjEdge.push_back(ne);
+}
+void point::UpdateAdjTri() {
+    // 删邻接三角形，需要删两个
+    std::stack<int> subs;
+    for (int i = 0; i < adjTri.size(); ++i) {
+        if (adjTri[i]->GetDeleted()) {
+            subs.push(i);
+        }
+    }
+    while (!subs.empty()) {
+        adjTri.erase(adjTri.begin() + subs.top());
+        subs.pop();
+    }
+}
+void point::UpdateAdjEdge() {
+    // 删邻接边，需要删一个
+    std::stack<int> subs;
+    for (int i = 0; i < adjEdge.size(); ++i) {
+        if (adjEdge[i]->GetDeleted()) {
+            subs.push(i);
+        }
+    }
+    while (!subs.empty()) {
+        adjEdge.erase(adjEdge.begin() + subs.top());
+        subs.pop();
+    }
 }
 void point::UpdateAdjEdgeOpPointData() {
     point* p;
@@ -112,6 +138,47 @@ void point::SetAdjPoint() {
     }
 }
 /*********************************************facet*******************************************/
+facet::facet(edge* newE, edge* oldE, point* oldP) {
+    // 点
+    _p1 = oldP;
+    /**注意：由于输出STL时要通过点的顺序来确定normal的方向，因此必须保证点的顺序**/
+    std::vector<point*> pOrder1 = oldE->GetAdjTri()[0]->GetPointOrderStartWithP(oldP);
+    std::vector<point*> pOrder2 = oldE->GetAdjTri()[1]->GetPointOrderStartWithP(oldP);
+    if (pOrder1[1] == pOrder2[2]) {
+        _p2 = pOrder2[1];
+        _p3 = pOrder1[2];
+    }
+    else if(pOrder1[2] == pOrder2[1]) {
+        _p2 = pOrder1[1];
+        _p3 = pOrder2[2];
+    }
+    else {
+        std::cout << "error: 不可能出现的错误，新建facet时错误0" << std::endl;
+    }
+
+    // 找到边的索引
+    std::vector<edge*> newEV;
+    for (edge* e : oldE->GetAdjTriEdges()) {
+        if (e->IsContainPoint(oldP)) {
+            newEV.push_back(e);
+        }
+    }
+    if (newEV.size() != 2) {
+        std::cout << "error: 不可能出现的错误，新建facet时错误1" << std::endl;
+    }
+    _edge1 = newE;
+    _edge2 = newEV[0];
+    _edge3 = newEV[1];
+
+    // normal设置为(0,0,0)
+    _normal.setXYZ(0, 0, 0);
+    /**注意：输出是normal是通过计算得到，所以_normal的存储无用**/
+
+    UpdateMiniInnerAngle();
+
+    faceID = _preFaceID++;
+    _isDeleted = false;
+}
 void facet::SetDeleted() {
     _edge1->SetDeleted();
     _edge2->SetDeleted();
@@ -217,5 +284,25 @@ point* facet::GetPointExE(edge* e) {
         std::cout << "error: 不可能出现的错误，facet::GetPointExE" << std::endl;
         return nullptr;
     }
+}
+void facet::UpdateMiniInnerAngle() {
+    std::vector<double> angles;
+    double angle1 = acos((_edge1->GetLength() * _edge1->GetLength() +
+        _edge2->GetLength() * _edge2->GetLength() -
+        _edge3->GetLength() * _edge3->GetLength()
+        ) / (2 * _edge1->GetLength() * _edge2->GetLength()));
+    double angle2 = acos((_edge1->GetLength() * _edge1->GetLength() +
+        _edge3->GetLength() * _edge3->GetLength() -
+        _edge2->GetLength() * _edge2->GetLength()
+        ) / (2 * _edge1->GetLength() * _edge3->GetLength()));
+    double angle3 = acos((_edge3->GetLength() * _edge3->GetLength() +
+        _edge2->GetLength() * _edge2->GetLength() -
+        _edge1->GetLength() * _edge1->GetLength()
+        ) / (2 * _edge3->GetLength() * _edge2->GetLength()));
+    angles.push_back(angle1);
+    angles.push_back(angle2);
+    angles.push_back(angle3);
+    std::sort(angles.begin(), angles.end());
+    _miniInnerAngle = angles[0];
 }
 /*********************************************edge********************************************/
